@@ -11,5 +11,5 @@ wheels/
 .venv
 .env
 AGENTS.md
-.streamlit
+
 
