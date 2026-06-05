@@ -1,0 +1,101 @@
+turbine_id,company,location,state,latitude,longitude,capacity_kw,install_year,turbine_age,iot_equipped,health_score,status,alert_level,last_inspection
+WT-001,Inox Wind,Jaisalmer,Rajasthan,25.892843,74.523534,2025,2023,1,True,86,Online,Normal,2024-01-26
+WT-002,Envision,Kutch,Gujarat,22.964358,72.438108,2238,2023,1,True,87,Online,Normal,2024-06-01
+WT-003,Vestas,Gadag,Karnataka,14.745348,75.690877,2513,2017,7,True,84,Online,Normal,2024-03-03
+WT-004,Envision,Bhavnagar,Gujarat,23.113041,72.939206,2099,2022,2,True,96,Online,Normal,2024-07-22
+WT-005,Envision,Davangere,Karnataka,15.213629,75.765723,2300,2018,6,False,71,Online,Warning,2024-06-07
+WT-006,GE Renewable,Chitradurga,Karnataka,13.694934,76.724896,2238,2020,4,True,81,Online,Normal,2024-12-19
+WT-007,Envision,Jaisalmer,Rajasthan,27.436524,70.28354,2959,2018,6,True,78,Online,Warning,2024-12-03
+WT-008,Inox Wind,Jaisalmer,Rajasthan,25.916192,69.240752,2224,2020,4,True,75,Online,Warning,2024-10-27
+WT-009,Vestas,Dindigul,Tamil Nadu,10.175975,80.15819,3144,2022,2,True,79,Online,Warning,2024-10-24
+WT-010,Suzlon,Jamnagar,Gujarat,22.266988,73.985292,2098,2017,7,False,71,Online,Warning,2024-03-07
+WT-011,Envision,Chitradurga,Karnataka,14.491023,75.846686,2163,2022,2,True,96,Online,Normal,2024-01-16
+WT-012,Inox Wind,Jodhpur,Rajasthan,28.003511,74.76449,2117,2020,4,True,82,Online,Normal,2024-08-30
+WT-013,Envision,Chitradurga,Karnataka,15.42972,77.166868,2739,2023,1,False,95,Online,Normal,2024-06-11
+WT-014,Vestas,Jaisalmer,Rajasthan,26.495655,70.211618,3539,2023,1,False,90,Online,Normal,2024-09-17
+WT-015,Envision,Bhavnagar,Gujarat,21.838083,69.824794,2951,2016,8,True,77,Online,Warning,2024-02-15
+WT-016,GE Renewable,Gadag,Karnataka,14.649377,77.81397,2545,2017,7,True,86,Online,Normal,2024-08-14
+WT-017,GE Renewable,Davangere,Karnataka,13.502878,75.591007,2552,2020,4,True,84,Online,Normal,2024-03-12
+WT-018,Envision,Rajkot,Gujarat,23.05954,68.53955,2065,2015,9,True,84,Online,Normal,2024-06-28
+WT-019,Envision,Dindigul,Tamil Nadu,9.178302,77.029247,2243,2022,2,True,86,Online,Normal,2024-08-06
+WT-020,Envision,Barmer,Rajasthan,26.694314,72.502685,2099,2015,9,False,86,Online,Normal,2024-03-01
+WT-021,Envision,Kutch,Gujarat,21.870297,69.546149,2745,2022,2,True,80,Online,Normal,2024-09-03
+WT-022,Envision,Tirunelveli,Tamil Nadu,8.278236,80.49713,2945,2015,9,False,85,Online,Normal,2024-05-11
+WT-023,Envision,Jamnagar,Gujarat,24.15855,69.405504,2497,2015,9,False,71,Maintenance,Warning,2024-08-30
+WT-024,Envision,Kolhapur,Maharashtra,17.823743,74.960014,2713,2018,6,True,90,Online,Normal,2024-11-02
+WT-025,Inox Wind,Jaisalmer,Rajasthan,25.200569,72.575914,2062,2023,1,True,97,Online,Normal,2024-02-21
+WT-026,Vestas,Jodhpur,Rajasthan,28.447277,72.028317,2640,2018,6,False,71,Online,Warning,2024-12-12
+WT-027,Inox Wind,Bhavnagar,Gujarat,21.714907,72.439055,2535,2018,6,True,73,Online,Warning,2024-09-01
+WT-028,Suzlon,Tirunelveli,Tamil Nadu,8.402934,77.352617,1574,2019,5,True,79,Online,Warning,2024-02-15
+WT-029,Vestas,Dindigul,Tamil Nadu,12.585597,79.31416,3256,2023,1,True,94,Online,Normal,2024-06-12
+WT-030,GE Renewable,Satara,Maharashtra,17.028932,76.169138,2106,2023,1,True,84,Online,Normal,2024-04-27
+WT-031,Inox Wind,Barmer,Rajasthan,27.021636,70.883409,2208,2015,9,True,74,Online,Warning,2024-01-12
+WT-032,Suzlon,Barmer,Rajasthan,25.646328,72.313766,1633,2021,3,True,77,Online,Warning,2024-12-29
+WT-033,GE Renewable,Theni,Tamil Nadu,11.203803,77.092375,2558,2017,7,True,76,Online,Warning,2024-01-31
+WT-034,Vestas,Jodhpur,Rajasthan,25.411174,74.850872,2930,2021,3,False,90,Online,Normal,2024-05-11
+WT-035,Vestas,Gadag,Karnataka,13.448402,77.735706,2862,2021,3,True,92,Online,Normal,2024-05-17
+WT-036,Envision,Barmer,Rajasthan,28.488667,75.439449,2806,2018,6,True,89,Online,Normal,2024-07-08
+WT-037,Suzlon,Coimbatore,Tamil Nadu,10.191563,77.614412,1733,2016,8,False,73,Online,Warning,2024-08-02
+WT-038,Inox Wind,Kutch,Gujarat,21.403696,73.837203,2863,2017,7,False,89,Online,Normal,2024-01-30
+WT-039,Envision,Bhavnagar,Gujarat,22.527379,73.913297,2444,2016,8,True,79,Online,Warning,2024-05-20
+WT-040,Envision,Coimbatore,Tamil Nadu,10.003218,76.779895,2446,2020,4,True,87,Online,Normal,2024-03-14
+WT-041,Inox Wind,Jamnagar,Gujarat,22.14164,72.334646,2307,2023,1,True,86,Online,Normal,2024-07-23
+WT-042,Inox Wind,Theni,Tamil Nadu,10.233413,79.834901,2924,2019,5,True,81,Online,Normal,2024-11-02
+WT-043,Inox Wind,Jamnagar,Gujarat,23.364695,71.311457,2329,2017,7,False,75,Online,Warning,2024-12-15
+WT-044,Inox Wind,Coimbatore,Tamil Nadu,11.700376,77.398563,2343,2018,6,True,71,Maintenance,Warning,2024-11-18
+WT-045,Vestas,Rajkot,Gujarat,23.514211,70.611882,2649,2021,3,True,88,Online,Normal,2024-01-13
+WT-046,Vestas,Gadag,Karnataka,13.439717,77.852881,2718,2023,1,True,89,Online,Normal,2024-03-13
+WT-047,Suzlon,Jodhpur,Rajasthan,27.381809,76.125297,1975,2022,2,True,91,Online,Normal,2024-09-25
+WT-048,Suzlon,Rajkot,Gujarat,23.602794,71.110709,2061,2019,5,True,89,Online,Normal,2024-05-31
+WT-049,Vestas,Rajkot,Gujarat,21.961091,68.926158,3567,2019,5,True,79,Online,Warning,2024-10-13
+WT-050,Envision,Coimbatore,Tamil Nadu,11.885305,76.756915,2154,2021,3,True,84,Online,Normal,2024-02-11
+WT-051,Envision,Kutch,Gujarat,23.998562,72.71077,2430,2021,3,True,94,Online,Normal,2024-06-11
+WT-052,Vestas,Rajkot,Gujarat,22.708803,70.001144,3358,2022,2,True,83,Online,Normal,2024-12-23
+WT-053,Vestas,Gadag,Karnataka,15.451805,76.369433,2838,2021,3,True,88,Online,Normal,2024-02-22
+WT-054,Inox Wind,Gadag,Karnataka,13.125712,75.826864,2138,2018,6,True,77,Online,Warning,2024-07-23
+WT-055,Envision,Chitradurga,Karnataka,15.087277,76.146074,2974,2023,1,True,97,Online,Normal,2024-05-04
+WT-056,Inox Wind,Satara,Maharashtra,18.008466,76.348835,2799,2018,6,False,83,Online,Normal,2024-05-12
+WT-057,Envision,Coimbatore,Tamil Nadu,10.557687,77.524975,2685,2020,4,True,86,Online,Normal,2024-03-09
+WT-058,Vestas,Satara,Maharashtra,17.657369,76.286662,2835,2021,3,True,89,Online,Normal,2024-02-18
+WT-059,Inox Wind,Jaisalmer,Rajasthan,27.788772,71.26187,2850,2016,8,False,79,Online,Warning,2024-02-01
+WT-060,Suzlon,Jaisalmer,Rajasthan,27.023843,71.559234,1938,2021,3,True,77,Online,Warning,2024-07-14
+WT-061,Inox Wind,Rajkot,Gujarat,22.524205,72.535874,2848,2019,5,True,90,Online,Normal,2024-09-14
+WT-062,Suzlon,Rajkot,Gujarat,23.907559,68.976646,1774,2022,2,True,86,Online,Normal,2024-11-18
+WT-063,Inox Wind,Theni,Tamil Nadu,9.000119,77.348479,2344,2019,5,True,90,Online,Normal,2024-05-31
+WT-064,Inox Wind,Satara,Maharashtra,16.982712,74.719284,2529,2023,1,True,92,Online,Normal,2024-12-06
+WT-065,Inox Wind,Gadag,Karnataka,13.735589,75.915404,2458,2018,6,True,82,Online,Normal,2024-09-09
+WT-066,Inox Wind,Bhavnagar,Gujarat,22.231337,70.995599,2352,2019,5,True,74,Online,Warning,2024-03-12
+WT-067,Inox Wind,Gadag,Karnataka,13.478852,77.085116,2973,2019,5,True,92,Online,Normal,2024-10-05
+WT-068,Inox Wind,Chitradurga,Karnataka,13.568708,75.128045,2102,2015,9,False,69,Online,Warning,2024-02-07
+WT-069,Inox Wind,Kolhapur,Maharashtra,18.236922,74.972636,2714,2015,9,False,75,Online,Warning,2024-08-23
+WT-070,Suzlon,Dindigul,Tamil Nadu,8.627479,76.761374,1552,2022,2,True,89,Online,Normal,2024-02-07
+WT-071,Envision,Barmer,Rajasthan,25.340724,70.861432,2830,2023,1,True,90,Online,Normal,2024-11-22
+WT-072,Envision,Jamnagar,Gujarat,22.040736,71.736888,2535,2021,3,True,87,Online,Normal,2024-11-18
+WT-073,GE Renewable,Satara,Maharashtra,17.75103,74.293938,2101,2016,8,True,71,Online,Warning,2024-01-12
+WT-074,Suzlon,Coimbatore,Tamil Nadu,9.584577,77.630873,1981,2022,2,True,81,Online,Normal,2024-05-25
+WT-075,Vestas,Rajkot,Gujarat,23.266722,73.496263,2905,2017,7,True,72,Online,Warning,2024-10-28
+WT-076,GE Renewable,Theni,Tamil Nadu,11.848535,80.270705,2449,2023,1,True,87,Online,Normal,2024-11-12
+WT-077,Envision,Jodhpur,Rajasthan,26.001472,69.684952,2442,2015,9,False,79,Online,Warning,2024-05-27
+WT-078,Inox Wind,Chitradurga,Karnataka,14.29741,76.047803,2781,2019,5,True,84,Online,Normal,2024-12-01
+WT-079,Vestas,Jamnagar,Gujarat,22.166579,72.185734,2686,2017,7,True,83,Online,Normal,2024-06-06
+WT-080,Inox Wind,Davangere,Karnataka,13.091743,74.808209,2410,2019,5,True,91,Online,Normal,2024-08-04
+WT-081,Vestas,Jodhpur,Rajasthan,26.847905,69.406531,2502,2023,1,True,93,Online,Normal,2024-11-26
+WT-082,Suzlon,Coimbatore,Tamil Nadu,13.1022,78.252464,1552,2022,2,True,96,Online,Normal,2024-11-17
+WT-083,Vestas,Kutch,Gujarat,22.93288,69.012651,2824,2016,8,True,70,Maintenance,Warning,2024-09-22
+WT-084,GE Renewable,Bhavnagar,Gujarat,22.454216,71.153748,2298,2022,2,True,88,Online,Normal,2024-07-25
+WT-085,Envision,Rajkot,Gujarat,24.024094,70.019361,2613,2021,3,True,91,Online,Normal,2024-05-26
+WT-086,Vestas,Jodhpur,Rajasthan,27.319694,73.949556,3079,2017,7,True,79,Online,Warning,2024-06-29
+WT-087,Inox Wind,Bhavnagar,Gujarat,24.043606,73.89426,2556,2018,6,False,75,Online,Warning,2024-08-08
+WT-088,Envision,Jamnagar,Gujarat,22.351276,72.150289,2762,2017,7,True,70,Online,Warning,2024-11-08
+WT-089,Suzlon,Chitradurga,Karnataka,13.249279,77.686546,1602,2015,9,False,74,Online,Warning,2024-03-30
+WT-090,Envision,Sangli,Maharashtra,17.746519,74.69245,2800,2016,8,False,85,Online,Normal,2024-10-10
+WT-091,Suzlon,Barmer,Rajasthan,28.489532,69.269243,1824,2016,8,True,81,Online,Normal,2024-06-06
+WT-092,GE Renewable,Kutch,Gujarat,23.661294,72.3714,2092,2016,8,True,81,Online,Normal,2024-01-25
+WT-093,Envision,Theni,Tamil Nadu,10.061626,77.082279,2815,2023,1,True,92,Online,Normal,2024-04-12
+WT-094,Envision,Barmer,Rajasthan,27.478841,70.806223,2080,2017,7,True,82,Online,Normal,2024-09-02
+WT-095,Envision,Chitradurga,Karnataka,15.253024,76.871638,2009,2017,7,True,88,Online,Normal,2024-11-06
+WT-096,Envision,Bhavnagar,Gujarat,22.598925,70.161669,2985,2021,3,False,77,Online,Warning,2024-07-24
+WT-097,Inox Wind,Theni,Tamil Nadu,8.120668,79.82015,2588,2021,3,True,86,Online,Normal,2024-12-27
+WT-098,Vestas,Kolhapur,Maharashtra,17.493455,76.212466,2600,2019,5,True,77,Online,Warning,2024-07-09
+WT-099,Envision,Jodhpur,Rajasthan,28.022309,74.756031,2194,2017,7,False,87,Online,Normal,2024-12-06
+WT-100,Envision,Bhavnagar,Gujarat,23.563259,68.995734,2807,2019,5,True,80,Online,Normal,2024-04-22

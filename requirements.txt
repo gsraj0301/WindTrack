@@ -2,4 +2,4 @@ pandas
 numpy
 faker
 streamlit
-plotify
+plotly
