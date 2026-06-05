@@ -8,9 +8,9 @@ import os
 # ── Load data ───────────────────────────────────────────
 @st.cache_data
 def load_power():
-    path = os.path.join(os.path.dirname(__file__), '..', 'data', 'power_output.csv')
+    base = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base, '..', 'data', 'power_output.csv')
     df = pd.read_csv(path, parse_dates=['timestamp'])
-    # Pre-compute time columns once — cheap to store, saves repeated work
     df['date']  = df['timestamp'].dt.date
     df['month'] = df['timestamp'].dt.to_period('M').astype(str)
     df['year']  = df['timestamp'].dt.year
@@ -19,7 +19,8 @@ def load_power():
 
 @st.cache_data
 def load_turbines():
-    path = os.path.join(os.path.dirname(__file__), '..', 'data', 'turbines.csv')
+    base = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base, '..', 'data', 'turbines.csv')
     return pd.read_csv(path)
 
 # ── Aggregation helpers (cached separately so filters reuse them) ──

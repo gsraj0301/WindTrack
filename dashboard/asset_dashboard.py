@@ -5,11 +5,11 @@ import os
 import numpy as np
 import plotly.graph_objects as go
 
-# Load date
+@st.cache_data
 def load_turbines():
-    path = os.path.join(os.path.dirname(__file__), '..', 'data', 'turbines.csv')
-    df = pd.read_csv(path)
-    return df
+    base = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base, '..', 'data', 'turbines.csv')
+    return pd.read_csv(path)
 
 def show():
 
