@@ -81,11 +81,26 @@ The result is a POC that I'm genuinely proud of. It's not hooked up to real turb
 
 ## 🚀 Running Locally
 
+**Step 1:** Generate the CSV data (skip if `data/turbines.csv` already exists):
 ```bash
-pip install -r requirements.txt
 python scripts/generate_data.py
+```
+
+**Step 2:** Load CSVs into SQLite:
+```bash
+python scripts/init_db.py
+```
+
+**Step 3:** Launch the dashboard:
+```bash
 cd dashboard && streamlit run app.py
 ```
+
+That's it — the app auto-starts the live simulator as a background thread on boot. No separate terminal to keep running.
+
+> Optional: want the simulator as its own process instead? Run `python scripts/simulator.py` in a separate terminal and it writes to the same database the dashboard reads.
+
+Watch the "Last updated" timestamp tick — that's how you know it's live.
 
 ---
 

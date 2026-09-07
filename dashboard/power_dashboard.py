@@ -2,40 +2,62 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import os
+import sqlite3
+from datetime import datetime
 
 # ── Load data ───────────────────────────────────────────
-@st.cache_data
 def load_power():
     base = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(base, '..', 'data', 'power_output.csv')
-    df = pd.read_csv(path, parse_dates=['timestamp'])
+    db_path = os.path.join(base, '..', 'data', 'windtrack.db')
+    conn = sqlite3.connect(db_path)
+    df = pd.read_sql_query("SELECT * FROM power_output", conn)
+    conn.close()
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['date']  = df['timestamp'].dt.date
     df['month'] = df['timestamp'].dt.to_period('M').astype(str)
     df['year']  = df['timestamp'].dt.year
     df['hour']  = df['timestamp'].dt.hour
     return df
 
-@st.cache_data
 def load_turbines():
     base = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(base, '..', 'data', 'turbines.csv')
-    return pd.read_csv(path)
+    db_path = os.path.join(base, '..', 'data', 'windtrack.db')
+    conn = sqlite3.connect(db_path)
+    df = pd.read_sql_query("SELECT * FROM turbines", conn)
+    conn.close()
+    return df
 
-# ── Aggregation helpers (cached separately so filters reuse them) ──
-@st.cache_data
+def load_live_kpis():
+    base = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base, '..', 'data', 'windtrack.db')
+    conn = sqlite3.connect(db_path)
+    total_kwh = pd.read_sql_query(
+        "SELECT COALESCE(SUM(kwh), 0) as total FROM power_output", conn
+    ).iloc[0]['total']
+    live_kwh = pd.read_sql_query(
+        "SELECT COALESCE(SUM(kwh), 0) as total FROM live_readings", conn
+    ).iloc[0]['total']
+    total_kwh += live_kwh
+
+    latest = pd.read_sql_query("""
+        SELECT turbine_id, kwh, state, health_score, status FROM live_readings
+        WHERE timestamp = (SELECT MAX(timestamp) FROM live_readings)
+    """, conn)
+    conn.close()
+    return total_kwh, latest
+
+# ── Aggregation helpers ──
 def get_daily(df):
     return df.groupby(['turbine_id', 'date', 'state'])['kwh'].sum().reset_index()
 
-@st.cache_data
 def get_monthly(df):
     return df.groupby(['turbine_id', 'month', 'state'])['kwh'].sum().reset_index()
 
-@st.cache_data
 def get_yearly(df):
     return df.groupby(['turbine_id', 'year', 'state'])['kwh'].sum().reset_index()
 
+@st.fragment(run_every=15)
 def show():
     power_df   = load_power()
     turbine_df = load_turbines()
@@ -47,17 +69,26 @@ def show():
     )
 
     # ── Page header ─────────────────────────────────────
-    st.title("⚡ Power Generation Dashboard")
+    st.markdown(
+        "⚡ Power Generation Dashboard <span style='color: #2E9E56; font-size: 13px;'>● LIVE</span>",
+        unsafe_allow_html=True
+    )
     st.caption("Energy output analysis across all turbines — Daily, Monthly, and Yearly views.")
+    st.caption(f"Last updated: {datetime.now().strftime('%H:%M:%S')}")
     st.markdown("---")
 
     # ── Farm-level KPIs ──────────────────────────────────
-    total_gwh        = round(power_df['kwh'].sum() / 1_000_000, 2)
-    avg_daily_mwh    = round(power_df.groupby('date')['kwh'].sum().mean() / 1000, 1)
-    best_turbine     = power_df.groupby('turbine_id')['kwh'].sum().idxmax()
-    best_turbine_gwh = round(power_df.groupby('turbine_id')['kwh'].sum().max() / 1_000_000, 3)
-    top_state        = power_df.groupby('state')['kwh'].sum().idxmax()
-    top_company      = power_df.groupby('company')['kwh'].sum().idxmax()
+    total_kwh, latest = load_live_kpis()
+    total_gwh = round(total_kwh / 1_000_000, 2)
+    avg_daily_mwh = round(power_df.groupby('date')['kwh'].sum().mean() / 1000, 1)
+    best_turbine = ''
+    best_turbine_gwh = 0.0
+    if len(latest) > 0:
+        bidx = latest['kwh'].idxmax()
+        best_turbine = latest.loc[bidx, 'turbine_id']
+        best_turbine_gwh = round(latest.loc[bidx, 'kwh'] / 1_000_000, 3)
+    top_state = power_df.groupby('state')['kwh'].sum().idxmax()
+    top_company = power_df.groupby('company')['kwh'].sum().idxmax()
 
     k1, k2, k3, k4, k5 = st.columns(5)
     k1.metric("Total Output",     f"{total_gwh} GWh")

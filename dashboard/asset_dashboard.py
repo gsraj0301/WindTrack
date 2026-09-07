@@ -2,22 +2,29 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
-import numpy as np
-import plotly.graph_objects as go
+import sqlite3
+from datetime import datetime
 
-@st.cache_data
 def load_turbines():
     base = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(base, '..', 'data', 'turbines.csv')
-    return pd.read_csv(path)
+    db_path = os.path.join(base, '..', 'data', 'windtrack.db')
+    conn = sqlite3.connect(db_path)
+    df = pd.read_sql_query("SELECT * FROM turbines", conn)
+    conn.close()
+    return df
 
+@st.fragment(run_every=15)
 def show():
 
     df = load_turbines()
 
     # Page Load
-    st.title("🏭 Asset Dashboard")
+    st.markdown(
+        "🏭 Asset Dashboard <span style='color: #2E9E56; font-size: 13px;'>● LIVE</span>",
+        unsafe_allow_html=True
+    )
     st.caption("Real-time overview of all wind turbines across the farm network")
+    st.caption(f"Last updated: {datetime.now().strftime('%H:%M:%S')}")
     st.markdown("---")
 
     # KPI row

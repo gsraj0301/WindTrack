@@ -11,5 +11,9 @@ wheels/
 .venv
 .env
 AGENTS.md
+.env.ndiaglm5
+
+# Generated database
+data/windtrack.db
 
 
