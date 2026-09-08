@@ -162,19 +162,31 @@ def _start_simulator_thread():
 
 _sim_thread = _start_simulator_thread()
 
+# Shared styles (sidebar needs the same tokens as the pages)
+from ui import inject_css
+inject_css()
+
 # Sidebar Navigation
-st.sidebar.image(
-    "https://img.icons8.com/fluency/96/wind-turbine.png",
-    width=80
+st.sidebar.markdown(
+    "<style>.wt_logo{width:44px;height:44px;border-radius:11px;"
+    "background:linear-gradient(140deg,#2E9E56,#1D6B38);display:flex;align-items:center;"
+    "justify-content:center;color:#fff;font-size:22px;font-weight:800;}</style>",
+    unsafe_allow_html=True,
 )
 
-st.sidebar.title("WindTrack")
-st.sidebar.caption("Wind Farm Intelligence Platform")
+st.sidebar.markdown(
+    "<div style='display:flex;align-items:center;gap:12px'>"
+    "<span class='wt_logo'>W</span>"
+    "<div>"
+    "<div style='font-size:19px;font-weight:700;color:#FAFAFA'>WindTrack</div>"
+    "<div style='font-size:12px;color:#8B93A7'>Wind Farm Intelligence Platform</div>"
+    "</div></div>",
+    unsafe_allow_html=True,
+)
 
 # ── Sidebar status section ────────────────────────────────────────
 st.sidebar.markdown("---")
 if os.path.exists(db_path):
-    st.sidebar.caption("🟢 Database: Connected")
     try:
         conn = sqlite3.connect(db_path)
         last_write = pd.read_sql_query(
@@ -184,21 +196,39 @@ if os.path.exists(db_path):
             "SELECT COUNT(*) as cnt FROM live_readings", conn
         ).iloc[0]['cnt']
         conn.close()
-        st.sidebar.caption(f"Last simulator write: {last_write or 'None yet'}")
-        st.sidebar.caption(f"Live readings: {live_count:,}")
+        db_tone = 'ok'
+        db_label = "Database &middot; Connected"
     except Exception:
-        st.sidebar.caption("Database: Error")
+        db_tone = 'crit'
+        db_label = "Database &middot; Error"
+        last_write = None
+        live_count = 0
 else:
-    st.sidebar.caption("🔴 Database: Not Found")
+    db_tone = 'crit'
+    db_label = "Database &middot; Not Found"
+    last_write = None
+    live_count = 0
 
-st.sidebar.caption("⚙️ Simulator: Running" if _sim_thread.is_alive() else "⚙️ Simulator: Starting...")
+sim_tone = 'ok' if _sim_thread.is_alive() else 'warn'
+sim_label = ("Simulator &middot; Running" if _sim_thread.is_alive()
+             else "Simulator &middot; Starting")
+
+st.sidebar.markdown(
+    f"<div class='wt_sys'>"
+    f"<div style='font-size:12px;font-weight:700;letter-spacing:0.08em;color:#8B93A7'>SYSTEM STATUS</div>"
+    f"<div class='wt_sysrow'><span class='wt_dot {db_tone}'></span>{db_label}</div>"
+    f"<div class='wt_sysrow'><span class='wt_dot {sim_tone}'></span>{sim_label}</div>"
+    f"<div class='wt_meta'>Last write: {last_write or 'None yet'}<br>Live readings: {live_count:,}</div>"
+    f"</div>",
+    unsafe_allow_html=True,
+)
 
 st.sidebar.markdown("---")
 
 page = st.sidebar.radio(
     "Navigate",
-     ["🏭  Asset Dashboard", "⚡  Power Generation"],
-    label_visibility="collapsed"
+    ["Asset Dashboard", "Power Generation"],
+    label_visibility="collapsed",
 )
 
 st.sidebar.markdown("---")
@@ -206,7 +236,7 @@ st.sidebar.caption("PoC · 100 Turbines · India")
 st.sidebar.caption("Data Year: 2024")
 
 # ── Route to page ───────────────────────────────────────
-if page == "🏭  Asset Dashboard":
+if page == "Asset Dashboard":
     from asset_dashboard import show
     show()
 else:

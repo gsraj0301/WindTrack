@@ -3,7 +3,7 @@
   <p><strong>IoT-Powered Wind Turbine Monitoring Dashboard</strong></p>
   <p>Proof of Concept — 100 turbines, real-time analytics, all synthetic data</p>
   <p>
-    <a href="https://windtrack-raj.streamlit.app" target="_blank">
+    <a href="https://windtrack-j4l6fmrgkx5n8r9kodjgya.streamlit.app" target="_blank">
       <strong>🌐 Live Demo →</strong>
     </a>
   </p>
@@ -32,18 +32,24 @@ WindTrack is my way of exploring what's possible with Python + Streamlit when yo
 ## ✨ Features
 
 ### Asset Dashboard
-- **Live KPIs** — total turbines, online/maintenance/offline counts, critical alerts, average health score
-- **Smart filters** — filter by company, state, status, alert level, and IoT equipment
+- **Live KPIs** — total turbines, online/maintenance/offline counts, critical alerts, avg health score, each with a live "vs last tick" delta
+- **Smart filters** — segmented controls for status/alert level, company & state dropdowns, IoT toggle, one-click reset
 - **Interactive map** — all 100 turbines plotted across India, color-coded by status
-- **Health monitoring** — histogram distribution and individual health progress bars
+- **Health monitoring** — tinted status/alert chips, histogram distribution and individual health progress bars
+- **Fleet status legend** — semantic color chips for online/maintenance/offline and alert levels
 - **Data export** — download filtered turbine data as CSV
 
 ### Power Generation Dashboard
-- **Farm-level KPIs** — total output (GWh), daily average, best turbine, top state and company
+- **Farm-level KPIs** — total output (GWh, live delta), daily average, best turbine, top state and company with supporting values
 - **Daily view** — date range picker with per-turbine breakdown
 - **Monthly view** — line chart, stacked bar by state, summary stats
 - **Yearly summary** — top 10 / bottom 10 turbines, company comparison, full performance table
 - **Turbine comparison** — select 2-6 turbines and compare monthly output side by side
+
+### Live Simulation
+- **Inline live pipeline** — a background simulator thread runs inside the Streamlit app (no separate process)
+- **Readings every 10s** — 100 turbine readings land in SQLite `live_readings`; statuses mutate 2-4× per tick
+- **Auto-refresh** — both dashboards refresh every 15 seconds with a pulsing LIVE badge
 
 ### Data Engine
 - **100 turbines** across 5 Indian states with realistic GPS coordinates

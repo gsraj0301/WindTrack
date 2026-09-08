@@ -4,22 +4,38 @@ import pandas as pd
 import plotly.express as px
 import os
 import sqlite3
-from datetime import datetime
+
+from ui import inject_css, style_fig, kpi_card, render_header
+
+COLORS = {'ok': '#34D399', 'warn': '#FBBF24', 'crit': '#F87171'}
 
 # ── Load data ───────────────────────────────────────────
+@st.cache_data(ttl=3600, show_spinner=False)
 def load_power():
+    """Read power_output + static turbine columns once per hour.
+
+    Returns (merged_df, avg_daily_mwh, top_state_series, top_company_series).
+    """
     base = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base, '..', 'data', 'windtrack.db')
     conn = sqlite3.connect(db_path)
     df = pd.read_sql_query("SELECT * FROM power_output", conn)
+    turb = pd.read_sql_query(
+        "SELECT turbine_id, company, capacity_kw FROM turbines", conn)
     conn.close()
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['date']  = df['timestamp'].dt.date
     df['month'] = df['timestamp'].dt.to_period('M').astype(str)
     df['year']  = df['timestamp'].dt.year
     df['hour']  = df['timestamp'].dt.hour
-    return df
 
+    merged = df.merge(turb, on='turbine_id', how='left')
+    avg_daily_mwh = round(merged.groupby('date')['kwh'].sum().mean() / 1000, 1)
+    top_state = merged.groupby('state')['kwh'].sum()
+    top_company = merged.groupby('company')['kwh'].sum()
+    return merged, avg_daily_mwh, top_state, top_company
+
+@st.cache_data(ttl=3600, show_spinner=False)
 def load_turbines():
     base = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base, '..', 'data', 'windtrack.db')
@@ -28,24 +44,30 @@ def load_turbines():
     conn.close()
     return df
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def load_historical_kwh():
+    base = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base, '..', 'data', 'windtrack.db')
+    conn = sqlite3.connect(db_path)
+    total = pd.read_sql_query(
+        "SELECT COALESCE(SUM(kwh), 0) as total FROM power_output", conn
+    ).iloc[0]['total']
+    conn.close()
+    return total
+
 def load_live_kpis():
     base = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base, '..', 'data', 'windtrack.db')
     conn = sqlite3.connect(db_path)
-    total_kwh = pd.read_sql_query(
-        "SELECT COALESCE(SUM(kwh), 0) as total FROM power_output", conn
-    ).iloc[0]['total']
     live_kwh = pd.read_sql_query(
         "SELECT COALESCE(SUM(kwh), 0) as total FROM live_readings", conn
     ).iloc[0]['total']
-    total_kwh += live_kwh
-
     latest = pd.read_sql_query("""
         SELECT turbine_id, kwh FROM live_readings
         WHERE timestamp = (SELECT MAX(timestamp) FROM live_readings)
     """, conn)
     conn.close()
-    return total_kwh, latest
+    return live_kwh, latest
 
 # ── Aggregation helpers ──
 def get_daily(df):
@@ -59,49 +81,63 @@ def get_yearly(df):
 
 @st.fragment(run_every=15)
 def show():
-    power_df   = load_power()
+    inject_css()
+    power_df, avg_daily_mwh, top_state, top_company = load_power()
     turbine_df = load_turbines()
 
-    # Merge company name into power data
-    power_df = power_df.merge(
-        turbine_df[['turbine_id', 'company', 'capacity_kw', 'status']],
-        on='turbine_id', how='left'
-    )
-
     # ── Page header ─────────────────────────────────────
-    st.markdown(
-        "⚡ Power Generation Dashboard <span style='color: #2E9E56; font-size: 13px;'>● LIVE</span>",
-        unsafe_allow_html=True
+    render_header(
+        "Power Generation",
+        "Energy output analysis across all turbines — Daily, Monthly, and Yearly views.",
+        live=True,
     )
-    st.caption("Energy output analysis across all turbines — Daily, Monthly, and Yearly views.")
-    st.caption(f"Last updated: {datetime.now().strftime('%H:%M:%S')}")
-    st.markdown("---")
+    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
     # ── Farm-level KPIs ──────────────────────────────────
-    total_kwh, latest = load_live_kpis()
-    total_gwh = round(total_kwh / 1_000_000, 2)
-    avg_daily_mwh = round(power_df.groupby('date')['kwh'].sum().mean() / 1000, 1)
-    best_turbine = ''
-    best_turbine_gwh = 0.0
+    live_kwh, latest = load_live_kpis()
+    total_gwh = round((load_historical_kwh() + live_kwh) / 1_000_000, 2)
+    prev_gwh = st.session_state.get('_power_snapshot')
+    st.session_state['_power_snapshot'] = total_gwh
+    best_turbine = '—'
+    best_turbine_kwh = 0.0
     if len(latest) > 0:
         bidx = latest['kwh'].idxmax()
         best_turbine = latest.loc[bidx, 'turbine_id']
-        best_turbine_gwh = round(latest.loc[bidx, 'kwh'] / 1_000_000, 3)
-    top_state = power_df.groupby('state')['kwh'].sum().idxmax()
-    top_company = power_df.groupby('company')['kwh'].sum().idxmax()
+        best_turbine_kwh = latest.loc[bidx, 'kwh']
+
+    total_sub = ""
+    if prev_gwh is not None:
+        diff = round(total_gwh - prev_gwh, 2)
+        if diff != 0:
+            arrow = '▲' if diff > 0 else '▼'
+            tone = COLORS['ok'] if diff > 0 else COLORS['crit']
+            total_sub = f'<span style="color:{tone}">{arrow} {abs(diff)} GWh since last tick</span>'
 
     k1, k2, k3, k4, k5 = st.columns(5)
-    k1.metric("Total Output",     f"{total_gwh} GWh")
-    k2.metric("Avg Daily",        f"{avg_daily_mwh} MWh/day")
-    k3.metric("Best Turbine",     best_turbine)
-    k4.metric("Top State",        top_state)
-    k5.metric("Top Company",      top_company)
+    with k1:
+        st.markdown(kpi_card("Total Output", f"{total_gwh} GWh", total_sub,
+                             value_color=COLORS['ok']), unsafe_allow_html=True)
+    with k2:
+        st.markdown(kpi_card("Avg Daily", f"{avg_daily_mwh} MWh/day"),
+                    unsafe_allow_html=True)
+    with k3:
+        best_sub = f"{best_turbine_kwh:,.0f} kWh in latest tick"
+        st.markdown(kpi_card("Best Turbine", best_turbine, best_sub),
+                    unsafe_allow_html=True)
+    with k4:
+        state_gwh = f"{top_state.max() / 1_000_000:.2f} GWh"
+        st.markdown(kpi_card("Top State", top_state.idxmax(), state_gwh),
+                    unsafe_allow_html=True)
+    with k5:
+        comp_gwh = f"{top_company.max() / 1_000_000:.2f} GWh"
+        st.markdown(kpi_card("Top Company", top_company.idxmax(), comp_gwh),
+                    unsafe_allow_html=True)
 
-    st.markdown("---")
+    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
     # ── View selector tabs ───────────────────────────────
     tab_daily, tab_monthly, tab_yearly, tab_compare = st.tabs([
-        "📅 Daily View", "📆 Monthly View", "🗓️ Yearly Summary", "🔀 Turbine Comparison"
+        "Daily View", "Monthly View", "Yearly Summary", "Turbine Comparison"
     ])
 
     # ════════════════════════════════════════════════════
@@ -145,12 +181,9 @@ def show():
                 color='MWh',
                 color_continuous_scale='Greens'
             )
-            fig_daily.update_layout(
-                coloraxis_showscale=False,
-                margin=dict(t=50, b=20, l=0, r=0),
-                height=380
-            )
-            st.plotly_chart(fig_daily, use_container_width=True)
+            style_fig(fig_daily, 380)
+            fig_daily.update_layout(coloraxis_showscale=False)
+            st.plotly_chart(fig_daily, width='stretch', config={'displayModeBar': False})
 
         # Per-turbine breakdown for selected range
         st.markdown("##### Per-Turbine Output (Selected Range)")
@@ -164,12 +197,9 @@ def show():
             title="Output by Turbine (Selected Date Range)",
             labels={'MWh': 'Output (MWh)', 'turbine_id': 'Turbine'}
         )
-        fig_turb.update_layout(
-            coloraxis_showscale=False,
-            margin=dict(t=50, b=20, l=0, r=0),
-            height=320
-        )
-        st.plotly_chart(fig_turb, use_container_width=True)
+        style_fig(fig_turb, 320)
+        fig_turb.update_layout(coloraxis_showscale=False)
+        st.plotly_chart(fig_turb, width='stretch', config={'displayModeBar': False})
 
     # ════════════════════════════════════════════════════
     # TAB 2 — MONTHLY VIEW
@@ -190,11 +220,8 @@ def show():
             color_discrete_sequence=['#2E9E56']
         )
         fig_month.update_traces(line=dict(width=3), marker=dict(size=10))
-        fig_month.update_layout(
-            margin=dict(t=50, b=20, l=0, r=0),
-            height=380
-        )
-        st.plotly_chart(fig_month, use_container_width=True)
+        style_fig(fig_month, 380)
+        st.plotly_chart(fig_month, width='stretch', config={'displayModeBar': False})
 
         # Monthly by state
         state_monthly = monthly_df.groupby(['month', 'state'])['kwh'].sum().reset_index()
@@ -209,11 +236,8 @@ def show():
             color_discrete_sequence=px.colors.qualitative.Safe,
             labels={'GWh': 'Output (GWh)', 'month': 'Month'}
         )
-        fig_state.update_layout(
-            margin=dict(t=50, b=20, l=0, r=0),
-            height=360
-        )
-        st.plotly_chart(fig_state, use_container_width=True)
+        style_fig(fig_state, 360)
+        st.plotly_chart(fig_state, width='stretch', config={'displayModeBar': False})
 
         # Monthly stats table
         st.markdown("##### Monthly Summary Table")
@@ -221,7 +245,7 @@ def show():
         summary.columns = ['Month', 'Output (GWh)']
         summary['vs Avg'] = summary['Output (GWh)'] - summary['Output (GWh)'].mean()
         summary['vs Avg'] = summary['vs Avg'].round(3)
-        st.dataframe(summary, use_container_width=True, hide_index=True)
+        st.dataframe(summary, width='stretch', hide_index=True)
 
     # ════════════════════════════════════════════════════
     # TAB 3 — YEARLY SUMMARY
@@ -249,32 +273,28 @@ def show():
             fig_top = px.bar(
                 top10, x='MWh', y='turbine_id',
                 orientation='h',
-                title="🏆 Top 10 Turbines (Annual Output)",
+                title="Top 10 Turbines (Annual Output)",
                 color='MWh', color_continuous_scale='Greens',
                 labels={'MWh': 'Output (MWh)', 'turbine_id': ''}
             )
-            fig_top.update_layout(
-                coloraxis_showscale=False,
-                margin=dict(t=50, b=20, l=0, r=0),
-                height=360, yaxis={'categoryorder': 'total ascending'}
-            )
-            st.plotly_chart(fig_top, use_container_width=True)
+            style_fig(fig_top, 360)
+            fig_top.update_layout(coloraxis_showscale=False,
+                                  yaxis={'categoryorder': 'total ascending'})
+            st.plotly_chart(fig_top, width='stretch', config={'displayModeBar': False})
 
         with y2:
             bot10 = turbine_yearly.tail(10)
             fig_bot = px.bar(
                 bot10, x='MWh', y='turbine_id',
                 orientation='h',
-                title="⚠️ Bottom 10 Turbines (Needs Attention)",
+                title="Bottom 10 Turbines (Needs Attention)",
                 color='MWh', color_continuous_scale='Reds',
                 labels={'MWh': 'Output (MWh)', 'turbine_id': ''}
             )
-            fig_bot.update_layout(
-                coloraxis_showscale=False,
-                margin=dict(t=50, b=20, l=0, r=0),
-                height=360, yaxis={'categoryorder': 'total ascending'}
-            )
-            st.plotly_chart(fig_bot, use_container_width=True)
+            style_fig(fig_bot, 360)
+            fig_bot.update_layout(coloraxis_showscale=False,
+                                  yaxis={'categoryorder': 'total ascending'})
+            st.plotly_chart(fig_bot, width='stretch', config={'displayModeBar': False})
 
         # Company comparison
         company_yearly = turbine_yearly.groupby('company').agg(
@@ -295,12 +315,9 @@ def show():
             labels={'Total_MWh': 'Total Output (MWh)', 'company': 'Company'}
         )
         fig_comp.update_traces(texttemplate='%{text:,.0f}', textposition='outside')
-        fig_comp.update_layout(
-            showlegend=False,
-            margin=dict(t=50, b=20, l=0, r=0),
-            height=360
-        )
-        st.plotly_chart(fig_comp, use_container_width=True)
+        style_fig(fig_comp, 360)
+        fig_comp.update_layout(showlegend=False)
+        st.plotly_chart(fig_comp, width='stretch', config={'displayModeBar': False})
 
         # Full table
         st.markdown("##### All Turbines — Annual Performance Table")
@@ -313,7 +330,7 @@ def show():
             'Annual Output (MWh)', 'Capacity Factor %', 'Health Score'
         ]
         st.dataframe(
-            display_yearly, use_container_width=True, hide_index=True,
+            display_yearly, width='stretch', hide_index=True,
             column_config={
                 'Capacity Factor %': st.column_config.ProgressColumn(
                     'Capacity Factor %', min_value=0, max_value=100, format="%.1f%%"
@@ -351,11 +368,8 @@ def show():
                 color_discrete_sequence=px.colors.qualitative.Safe
             )
             fig_cmp.update_traces(line=dict(width=2.5), marker=dict(size=8))
-            fig_cmp.update_layout(
-                margin=dict(t=50, b=20, l=0, r=0),
-                height=420
-            )
-            st.plotly_chart(fig_cmp, use_container_width=True)
+            style_fig(fig_cmp, 420)
+            st.plotly_chart(fig_cmp, width='stretch', config={'displayModeBar': False})
 
             # Stats table for selected turbines
             yearly_sel = power_df[power_df['turbine_id'].isin(sel_compare)]
@@ -366,6 +380,6 @@ def show():
                 Zero_Hours=('kwh', lambda x: (x == 0).sum())
             ).reset_index()
             stats.columns = ['Turbine', 'Annual (MWh)', 'Avg Hourly (kWh)', 'Peak Hour (kWh)', 'Zero Output Hours']
-            st.dataframe(stats, use_container_width=True, hide_index=True)
+            st.dataframe(stats, width='stretch', hide_index=True)
         else:
             st.info("Select at least one turbine above to see the comparison.")

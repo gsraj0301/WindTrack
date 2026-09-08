@@ -5,10 +5,13 @@ WindTrack is a synthetic wind turbine data generator and Streamlit monitoring da
 
 ## Project Structure
 - `scripts/generate_data.py` — main data generation script
-- `dashboard/app.py` — Streamlit multi-page entry point (routes to asset/power pages)
+- `scripts/init_db.py` — loads CSVs into SQLite (`data/windtrack.db`)
+- `scripts/simulator.py` — standalone live simulator (optional; not needed for the app)
+- `dashboard/app.py` — Streamlit entry point (init DB, inline simulator thread, sidebar, routing)
 - `dashboard/asset_dashboard.py` — asset overview page (turbine map, KPIs, filters, health scores)
 - `dashboard/power_dashboard.py` — power generation dashboard (daily/monthly/yearly views, turbine comparison)
-- `data/` — contains generated CSVs (`.gitignore`d)
+- `dashboard/ui.py` — shared UI primitives (CSS, status chips, KPI cards, header, plotly style)
+- `data/` — contains generated CSVs + `windtrack.db` (`.gitignore`d)
 - `.streamlit/config.toml` — dark theme and headless server config
 - `requirements.txt` — pinned dependencies
 
@@ -38,6 +41,11 @@ WindTrack is a synthetic wind turbine data generator and Streamlit monitoring da
 - Removed `pyproject.toml` and `uv.lock` (conflicted with `requirements.txt` on Streamlit Cloud)
 - Switched all file path resolution to `os.path.abspath(__file__)` for reliable Streamlit Cloud deployment
 - Pinned exact dependency versions in `requirements.txt`
+- `px.scatter_mapbox` → `px.scatter_map` + `map_style` in `asset_dashboard.py` (plotly v7 removed mapbox traces)
+- `plotly>=5.18.0` → `>=5.24.0` in `requirements.txt` (first version with `px.scatter_map`)
+- `live_readings` query in `power_dashboard.py` dropped `state`/`health_score`/`status` (columns absent from `live_readings` schema → SQLite `no such column` crash)
+- Simulator loop inlined into `dashboard/app.py` (Cloud can't run separate processes); guarded by `@st.cache_resource` so exactly one thread runs
+- `use_container_width=True` → `width='stretch'` (deprecated in Streamlit; removal after 2025-12-31)
 
 ## Output
 Generated CSVs land in `data/`:
@@ -122,3 +130,35 @@ UptimeRobot: pings both URLs every 5 min to prevent sleep
 - No credit card — must use free tiers only
 - Railway (no CC) for FastAPI + SQLite + simulator
 - UptimeRobot (free) to keep both platforms awake
+
+## Session 2026-09-08 — Live: Built Simpler Than the Railway Plan + UI Polish
+
+The "Next Phase" plan above (FastAPI + Railway + HTTP) was **superseded**. The live demo was shipped with a
+simpler stack that needs only Streamlit Cloud (free, no Railway/UptimeRobot):
+
+### What was actually built
+- **SQLite + inline simulator thread** instead of FastAPI:
+  - `dashboard/app.py` starts one daemon thread (`@st.cache_resource`, so exactly one runs regardless of users)
+  - The infinite loop is **inlined** in `app.py` (copied from `scripts/simulator.py`): every 10s writes 100 rows to
+    `live_readings` and mutates 2-4 turbine statuses in `turbines`
+  - "Starting..." until a cycle completes; sidebar shows last write + live reading count
+- **Dashboards read SQLite directly** and auto-refresh via `st.fragment(run_every=15)`
+- `ui.py` bug worth remembering: in `run_simulator`, `changes`/`now` must be initialized before the try so a
+  failed cycle doesn't crash the thread (UnboundLocalError)
+
+### UI polish (impeccable pass)
+- **De-emoji**: headers, tabs, KPI labels, and nav are plain text; replaced emoji dots/badges with semantic
+  tinted chips (`.wt_chip` / `.wt_dot` in `ui.py`)
+- **Unified design system** in `dashboard/ui.py`: `kpi_card()`, `render_header()` (LIVE badge), `status/alert`
+  chips, `style_fig()` (transparent bg, muted gridlines, Inter), one shared scoped CSS block
+- **Live KPI deltas**: status/health counts show `▲ n / ▼ n vs last tick` computed from a `st.session_state`
+  snapshot each fragment rerun
+- **Filters**: Status/Alert use `st.segmented_control`; added Reset + active-filter summary + empty state
+- **Caching perf fix**: `load_power()` (1.75M rows) and `load_turbines()` are `@st.cache_data(ttl=3600/60)` so
+  the fragment only touches `live_readings` live — previous code re-read all rows every 15s
+- **Sidebar**: replaced external icons8 logo with a CSS `.wt_logo` mark + compact SYSTEM STATUS block
+  (Database / Simulator dots + meta)
+- `use_container_width=True` → `width='stretch'` across all dashboards
+
+### Current live URL
+- `https://windtrack-j4l6fmrgkx5n8r9kodjgya.streamlit.app` (Streamlit Cloud; DB is ephemeral per deploy, re-seeds on first visit)
