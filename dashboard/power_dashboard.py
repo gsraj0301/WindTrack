@@ -41,7 +41,7 @@ def load_live_kpis():
     total_kwh += live_kwh
 
     latest = pd.read_sql_query("""
-        SELECT turbine_id, kwh, state, health_score, status FROM live_readings
+        SELECT turbine_id, kwh FROM live_readings
         WHERE timestamp = (SELECT MAX(timestamp) FROM live_readings)
     """, conn)
     conn.close()

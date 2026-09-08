@@ -140,7 +140,7 @@ def show():
     color_map_status = {'Online': '#2E9E56', 'Maintenance': '#FFA726', 'Offline': '#EF5350'}
     map_df = filtered.copy()
     map_df['color'] = map_df['status'].map(color_map_status)
-    fig_map = px.scatter_mapbox(
+    fig_map = px.scatter_map(
         map_df,
         lat='latitude', lon='longitude',
         color='status',
@@ -158,10 +158,10 @@ def show():
         zoom=4.5,
         center={'lat': 20.5, 'lon': 76.0},
         height=420,
-        title="Wind Farm Locations Across India"
+        title="Wind Farm Locations Across India",
+        map_style="open-street-map"
     )
     fig_map.update_layout(
-        mapbox_style="open-street-map",
         margin=dict(t=40, b=0, l=0, r=0)
     )
 
