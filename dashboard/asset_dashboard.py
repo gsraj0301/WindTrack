@@ -45,6 +45,10 @@ def fill_deltas(kpis):
 @st.fragment(run_every=15)
 def show():
     inject_css()
+    if st.session_state.pop('_reset_filters', False):
+        for _k in ("asset_company", "asset_state", "asset_status",
+                   "asset_alert", "asset_iot"):
+            st.session_state.pop(_k, None)
     df = load_turbines()
     kpis = compute_kpis(df)
     deltas = fill_deltas(kpis)
@@ -122,10 +126,7 @@ def show():
         iot_filter = st.checkbox("Only IoT-equipped turbines", key="asset_iot")
     with c2:
         if st.button("Reset filters", width='stretch'):
-            for k, v in [("asset_company", "All"), ("asset_state", "All"),
-                         ("asset_status", "All"), ("asset_alert", "All"),
-                         ("asset_iot", False)]:
-                st.session_state[k] = v
+            st.session_state['_reset_filters'] = True
             st.rerun()
 
     # Apply filters
