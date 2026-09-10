@@ -176,8 +176,10 @@ simpler stack that needs only Streamlit Cloud (free, no Railway/UptimeRobot):
 - Semantic status colors in charts/pies/KPIs kept as-is (only light-theme variants)
 
 ### Global footer
-- `st.set_page_config(..., footer="© 2026 Agni PRIDE — Built by Raj G AI & DS")` — native footer on all pages
-- `requirements.txt`: `streamlit>=1.30.0` → `>=1.37.0` (first version with the `footer` param)
+- Styled HTML footer via `.wt_footer` CSS in `ui.py` (centered, muted `#5B6470`, hairline top border)
+- Rendered in `dashboard/app.py` after page routing — shows on all pages; sits outside the `run_every=15` fragments
+- `st.set_page_config(..., footer=...)` does **NOT exist** in Streamlit (≤1.58.0) — TypeError on Cloud; use the HTML approach
+- `requirements.txt` stays `streamlit>=1.30.0` (no version bump needed)
 - This footer is the default for all of Raj's projects (see README_MAKER structure step 8)
 
 ### Health delta rounding

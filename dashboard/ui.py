@@ -113,6 +113,15 @@ html, body, [data-testid="stAppViewContainer"],
 @media (prefers-reduced-motion: reduce) {{
     .wt_live.on .wt_dot {{ animation: none; }}
 }}
+
+.wt_footer {{
+    margin-top: 28px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(26,35,50,0.08);
+    text-align: center;
+    font-size: 12px;
+    color: #5B6470;
+}}
 </style>
 """
 

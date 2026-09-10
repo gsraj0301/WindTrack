@@ -14,7 +14,6 @@ st.set_page_config(
     page_icon="🌬️",
     layout="wide",
     initial_sidebar_state="expanded",
-    footer="© 2026 Agni PRIDE — Built by Raj G AI & DS",
 )
 
 # ── Paths ─────────────────────────────────────────────────────────
@@ -243,3 +242,7 @@ if page == "Asset Dashboard":
 else:
     from power_dashboard import show
     show()
+
+# ── Global footer (all pages) ───────────────────────────
+st.markdown('<div class="wt_footer">© 2026 Agni PRIDE — Built by Raj G AI &amp; DS</div>',
+            unsafe_allow_html=True)
