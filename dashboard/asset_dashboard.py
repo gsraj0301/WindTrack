@@ -46,9 +46,11 @@ def fill_deltas(kpis):
 def show():
     inject_css()
     if st.session_state.pop('_reset_filters', False):
-        for _k in ("asset_company", "asset_state", "asset_status",
-                   "asset_alert", "asset_iot"):
-            st.session_state.pop(_k, None)
+        st.session_state['asset_company'] = "All"
+        st.session_state['asset_state'] = "All"
+        st.session_state['asset_status'] = "All"
+        st.session_state['asset_alert'] = "All"
+        st.session_state['asset_iot'] = False
     df = load_turbines()
     kpis = compute_kpis(df)
     deltas = fill_deltas(kpis)
@@ -115,11 +117,11 @@ def show():
     with s1:
         sel_status = st.segmented_control(
             "Status", ["All", "Online", "Maintenance", "Offline"],
-            default="All", key="asset_status")
+            value="All", key="asset_status")
     with s2:
         sel_alert = st.segmented_control(
             "Alert Level", ["All", "Normal", "Warning", "Critical"],
-            default="All", key="asset_alert")
+            value="All", key="asset_alert")
 
     c1, c2 = st.columns([3, 1])
     with c1:
