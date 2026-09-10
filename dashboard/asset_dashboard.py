@@ -93,7 +93,7 @@ def show():
         sub = ""
         if d is not None and d != 0:
             sign = "+" if d > 0 else ""
-            sub = f"{sign}{d} pts vs last tick"
+            sub = f"{sign}{round(d, 1)} pts vs last tick"
         health_color = COLORS['ok'] if kpis['health'] >= 60 else COLORS['warn']
         st.markdown(kpi_card("Avg Health Score", f"{kpis['health']}%",
                              sub, value_color=health_color),
