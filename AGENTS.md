@@ -162,3 +162,24 @@ simpler stack that needs only Streamlit Cloud (free, no Railway/UptimeRobot):
 
 ### Current live URL
 - `https://windtrack-j4l6fmrgkx5n8r9kodjgya.streamlit.app` (Streamlit Cloud; DB is ephemeral per deploy, re-seeds on first visit)
+
+## Session 2026-09-10 — Sky.Light Theme + Global Footer + Health Delta Rounding
+
+### Theme (dark → sky light)
+- `.streamlit/config.toml`: `base="light"`, `primaryColor="#1E78B8"`, `backgroundColor="#D6E8F5"`,
+  `secondaryBackgroundColor="#C2D9ED"`, `textColor="#0F2337"` (steel-blue-grey, kills near-white flashbang)
+- `ui.py` tokens: `ok/warn/crit` → `#16A34A/#D97706/#DC2626` (readable on light); `ink`→`#0F2337`-family `#1A2332`,
+  `muted`→`#5B6470`, `grid`→`rgba(26,35,50,0.08)`; `.wt_card` → white; `.wt_live` badge → blue `#1E78B8` + blue pulse;
+  `.wt_logo` gradient → `#1E78B8→#155A8A`; hover labels → white
+- Map: `map_style="carto-positron"` (light, no API key); font/title → `#1A2332`
+- Accent series: `color_discrete_sequence=['#2E9E56']` → `['#1E78B8']` in asset hist + power monthly line
+- Semantic status colors in charts/pies/KPIs kept as-is (only light-theme variants)
+
+### Global footer
+- `st.set_page_config(..., footer="© 2026 Agni PRIDE — Built by Raj G AI & DS")` — native footer on all pages
+- `requirements.txt`: `streamlit>=1.30.0` → `>=1.37.0` (first version with the `footer` param)
+- This footer is the default for all of Raj's projects (see README_MAKER structure step 8)
+
+### Health delta rounding
+- `asset_dashboard.py` avg-health delta: `round(d, 1)` so it shows `-0.7 pts vs last tick` instead of a long float
+- Other deltas are integer counts (online/maintenance/offline/critical) or already rounded (power GWh round 2) — no change

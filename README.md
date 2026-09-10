@@ -51,6 +51,10 @@ WindTrack is my way of exploring what's possible with Python + Streamlit when yo
 - **Readings every 10s** — 100 turbine readings land in SQLite `live_readings`; statuses mutate 2-4× per tick
 - **Auto-refresh** — both dashboards refresh every 15 seconds with a pulsing LIVE badge
 
+### Dashboard Polish
+- **Sky-light theme** — steel-blue-grey backgrounds, clean light map, readable semantic status colors
+- **Footer** — every page carries the `© 2026 Agni PRIDE — Built by Raj G AI & DS` signature
+
 ### Data Engine
 - **100 turbines** across 5 Indian states with realistic GPS coordinates
 - **5 manufacturers** — Envision, Suzlon, Inox Wind, Vestas, GE Renewable
