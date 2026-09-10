@@ -46,6 +46,8 @@ WindTrack is a synthetic wind turbine data generator and Streamlit monitoring da
 - `live_readings` query in `power_dashboard.py` dropped `state`/`health_score`/`status` (columns absent from `live_readings` schema → SQLite `no such column` crash)
 - Simulator loop inlined into `dashboard/app.py` (Cloud can't run separate processes); guarded by `@st.cache_resource` so exactly one thread runs
 - `use_container_width=True` → `width='stretch'` (deprecated in Streamlit; removal after 2025-12-31)
+- Asset dashboard Reset filters: `pop()` keys → explicit `session_state[key] = "All"` assignment (Streamlit widgets ignore deleted keys; setting values is the documented approach)
+- `st.segmented_control` has no `value` param — only `default` (TypeError if `value=` is used)
 
 ## Output
 Generated CSVs land in `data/`:
@@ -185,3 +187,9 @@ simpler stack that needs only Streamlit Cloud (free, no Railway/UptimeRobot):
 ### Health delta rounding
 - `asset_dashboard.py` avg-health delta: `round(d, 1)` so it shows `-0.7 pts vs last tick` instead of a long float
 - Other deltas are integer counts (online/maintenance/offline/critical) or already rounded (power GWh round 2) — no change
+
+### Filter reset fix
+- Reset button didn't visually reset Status, Alert Level, Company, State filters back to "All"
+- Root cause: `st.session_state.pop()` deletes keys but Streamlit widgets ignore deleted keys on re-render
+- Fix: set explicit values (`st.session_state['asset_status'] = "All"`) instead of popping — Streamlit reads these before widget creation
+- `st.segmented_control` uses `default` not `value` — `value=` causes TypeError

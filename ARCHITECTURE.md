@@ -1,0 +1,153 @@
+# Architecture
+
+> Last updated: 2026-09-10
+
+## Overview
+
+WindTrack is a synthetic wind turbine monitoring dashboard built with Streamlit. It generates realistic IoT-style data for 100 wind turbines across 5 Indian states, stores it in SQLite, and presents two auto-refreshing dashboards — one for fleet asset health, one for power generation analytics. A background simulator thread mutates turbine statuses and writes live readings every 10 seconds.
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Streamlit Cloud                        │
+│                                                          │
+│  ┌──────────────┐    ┌──────────────────────────────┐   │
+│  │  app.py       │───▶│  SQLite (data/windtrack.db)   │   │
+│  │  (entry point)│    │  4 tables:                    │   │
+│  │               │    │  - turbines (static metadata) │   │
+│  │  sidebar nav  │    │  - power_output (historical)  │   │
+│  │  DB init      │    │  - sensor_readings (historical│   │
+│  │  simulator    │    │  - live_readings (real-time)  │   │
+│  │  thread       │    └──────────┬───────────────────┘   │
+│  └──────┬───────┘               │                        │
+│         │                       │                        │
+│         ▼                       ▼                        │
+│  ┌─────────────┐     ┌──────────────────┐               │
+│  │ asset_dash-  │     │ power_dashboard   │               │
+│  │ board.py     │     │ .py               │               │
+│  │ (fleet view) │     │ (energy analytics)│               │
+│  └─────────────┘     └──────────────────┘               │
+│         │                       │                        │
+│         └───────┬───────────────┘                        │
+│                 ▼                                        │
+│          ┌────────────┐                                  │
+│          │   ui.py     │                                  │
+│          │ (shared CSS │                                  │
+│          │  + widgets) │                                  │
+│          └────────────┘                                  │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Module Breakdown
+
+### `scripts/` — Data generation & initialization
+
+- **`generate_data.py`** — Offline batch job that creates 3 CSV files:
+  - `turbines.csv` — 100 turbines with metadata (company, location, GPS, health, status)
+  - `power_output.csv` — 30-min interval power readings for full year (~1.75M rows)
+  - `sensor_readings.csv` — vibration, temperature, RPM, wind speed for IoT-equipped turbines
+  - Uses Faker for Indian location names, NumPy for realistic distributions
+  - Seasonal wind patterns by state, hourly daytime factors, health-based degradation
+
+- **`init_db.py`** — Creates SQLite DB with WAL mode, 4 tables, loads CSVs via `pd.to_sql()`
+  - Called by `app.py` on first visit if DB doesn't exist
+  - Tables: `turbines`, `power_output`, `sensor_readings`, `live_readings`
+
+- **`simulator.py`** — Standalone simulator (optional; same logic is inlined in `app.py`)
+
+### `dashboard/` — Streamlit application
+
+- **`app.py`** — Entry point and orchestrator:
+  - Page config, DB auto-init, inline simulator thread (`@st.cache_resource`)
+  - Sidebar with navigation, SYSTEM STATUS block (DB + simulator health)
+  - Routes to `asset_dashboard.show()` or `power_dashboard.show()`
+  - Global footer on all pages
+
+- **`asset_dashboard.py`** — Fleet health overview:
+  - 7 KPI cards with live deltas (total, online, maintenance, offline, IoT, critical, avg health)
+  - Filters: Company/State selectbox, Status/Alert segmented controls, IoT checkbox, Reset button
+  - Turbine map (`px.scatter_map` with carto-positron), health histogram, detail table with CSV export
+  - Auto-refreshes every 15s via `@st.fragment(run_every=15)`
+  - `load_turbines()` cached with `@st.cache_data(ttl=60)` — only `live_readings` touched live
+
+- **`power_dashboard.py`** — Energy analytics:
+  - 5 KPI cards (total GWh, avg daily, best turbine, top state, top company)
+  - 4 tabs: Daily (date range + per-turbine), Monthly (line + stacked bar + stats table),
+    Yearly (top/bottom 10, company comparison, full table), Turbine Comparison (2-6 head-to-head)
+  - Auto-refreshes every 15s via `@st.fragment(run_every=15)`
+  - `load_power()` cached with `@st.cache_data(ttl=3600)` — 1.75M rows loaded once per hour
+
+- **`ui.py`** — Shared design system:
+  - CSS tokens: semantic colors (ok/warn/crit), ink, muted, grid
+  - Components: `kpi_card()`, `chip()`, `status_chip()`, `alert_chip()`, `live_badge()`, `render_legend()`
+  - `style_fig()` — transparent Plotly layout with muted gridlines, Inter font
+  - `inject_css()` — scoped CSS block injected once per page
+
+### `data/` — Database & CSVs (gitignored)
+
+- `windtrack.db` — SQLite database (auto-created on first visit)
+- `turbines.csv`, `power_output.csv`, `sensor_readings.csv` — generated by `generate_data.py`
+
+### `.streamlit/` — Streamlit config
+
+- `config.toml` — Sky-light theme (blue primary `#1E78B8`, steel-blue-grey background), headless server
+
+## Data Flow
+
+```
+1. generate_data.py ──▶ data/*.csv (offline, one-time)
+2. init_db.py ──▶ data/windtrack.db (offline, one-time or on first visit)
+3. app.py starts ──▶ checks DB exists ──▶ if not, runs init_database()
+4. Simulator thread (daemon, every 10s):
+   a. Reads turbine metadata from DB
+   b. Generates 100 readings (vibration, temp, RPM, wind, kWh)
+   c. Writes to live_readings table
+   d. Mutates 2-4 turbine statuses in turbines table
+5. Dashboard fragments (every 15s):
+   a. asset_dashboard: reads turbines + live_readings (cached), computes KPIs, renders
+   b. power_dashboard: reads power_output (cached hourly) + live_readings, renders
+6. User interacts: filters, tabs, date pickers trigger Streamlit reruns
+```
+
+## Key Design Decisions
+
+- **Inline simulator** — Streamlit Cloud can't run background processes; the simulator runs as a daemon thread inside the Streamlit process via `@st.cache_resource` (shared across all sessions, exactly one thread)
+- **Direct SQLite reads** — Dashboards read SQLite directly instead of going through an API; simpler deployment, sufficient for PoC scale (100 turbines)
+- **Aggressive caching** — `load_power()` (1.75M rows) cached for 1 hour; `load_turbines()` for 60s; only `live_readings` accessed live in each fragment cycle
+- **Fragment-based refresh** — `@st.fragment(run_every=15)` avoids full-page reruns; only the dashboard fragment re-executes
+- **Session state for widget reset** — Streamlit widgets ignore deleted keys; explicit `session_state[key] = "All"` is the documented way to reset widgets programmatically
+- **Sky-light theme** — `carto-positron` map (no API key), steel-blue-grey backgrounds, white cards, semantic status colors (green/amber/red) kept consistent across light theme
+
+## External Integrations
+
+- **Streamlit Cloud** — Deployment platform (free tier); entry point `dashboard/app.py`
+- **Plotly** — All charts and maps (`px.pie`, `px.bar`, `px.line`, `px.histogram`, `px.scatter_map`)
+- **SQLite** — Embedded database with WAL mode for concurrent read/write (simulator writes, dashboard reads)
+- **Faker** — Indian locale synthetic names for turbine locations
+
+## Directory Structure
+
+```
+windtrack/
+├── dashboard/
+│   ├── app.py                 # Entry point, simulator thread, sidebar, routing
+│   ├── asset_dashboard.py     # Fleet health: KPIs, map, filters, table
+│   ├── power_dashboard.py     # Energy analytics: daily/monthly/yearly tabs
+│   └── ui.py                  # Shared CSS, KPI cards, chips, plotly styling
+├── scripts/
+│   ├── generate_data.py       # Synthetic data generator (CSVs)
+│   ├── init_db.py             # SQLite schema + CSV → DB loader
+│   └── simulator.py           # Standalone simulator (optional)
+├── data/
+│   ├── windtrack.db           # SQLite database (auto-created, gitignored)
+│   ├── turbines.csv           # 100 turbine metadata rows
+│   ├── power_output.csv       # ~1.75M power readings (30-min intervals)
+│   └── sensor_readings.csv    # IoT sensor data for equipped turbines
+├── .streamlit/
+│   └── config.toml            # Sky-light theme + headless server
+├── requirements.txt           # pandas, numpy, faker, streamlit, plotly
+├── AGENTS.md                  # Agent memory (session history, fixes)
+├── ARCHITECTURE.md            # This file
+└── README.md                  # Project overview + running instructions
+```
