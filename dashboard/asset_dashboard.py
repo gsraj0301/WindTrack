@@ -117,11 +117,11 @@ def show():
     with s1:
         sel_status = st.segmented_control(
             "Status", ["All", "Online", "Maintenance", "Offline"],
-            value="All", key="asset_status")
+            default="All", key="asset_status")
     with s2:
         sel_alert = st.segmented_control(
             "Alert Level", ["All", "Normal", "Warning", "Critical"],
-            value="All", key="asset_alert")
+            default="All", key="asset_alert")
 
     c1, c2 = st.columns([3, 1])
     with c1:
