@@ -244,5 +244,5 @@ else:
     show()
 
 # ── Global footer (all pages) ───────────────────────────
-st.markdown('<div class="wt_footer">© 2026 Agni PRIDE — Built by Raj G AI &amp; DS</div>',
+st.markdown('<div class="wt_footer">© Built by Raj G AI &amp; DS</div>',
             unsafe_allow_html=True)
