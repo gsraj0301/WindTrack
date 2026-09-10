@@ -9,7 +9,7 @@ from ui import (
     render_header, render_legend,
 )
 
-COLORS = {'ok': '#34D399', 'warn': '#FBBF24', 'crit': '#F87171'}
+COLORS = {'ok': '#16A34A', 'warn': '#D97706', 'crit': '#DC2626'}
 
 
 @st.cache_data(ttl=60, show_spinner=False)
@@ -222,13 +222,14 @@ def show():
         },
         zoom=4.5, center={'lat': 20.5, 'lon': 76.0},
         height=420, title="Wind Farm Locations Across India",
-        map_style="open-street-map",
+        map_style="carto-positron",
     )
     fig_map.update_layout(
         margin=dict(t=44, b=0, l=0, r=0),
         paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(size=12, color='#8B93A7'),
-        title=dict(font=dict(color='#FAFAFA', size=15), x=0.01, xanchor='left'),
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(size=12, color='#1A2332'),
+        title=dict(font=dict(color='#1A2332', size=15), x=0.01, xanchor='left'),
     )
     st.plotly_chart(fig_map, width='stretch', config={'displayModeBar': False})
 
@@ -239,7 +240,7 @@ def show():
         filtered, x='health_score', nbins=20,
         title='Health Score Distribution (Filtered Turbines)',
         labels={'health_score': 'Health Score', 'count': 'Number of Turbines'},
-        color_discrete_sequence=['#2E9E56'],
+        color_discrete_sequence=['#1E78B8'],
     )
     style_fig(fig_hist, 260)
     st.plotly_chart(fig_hist, width='stretch', config={'displayModeBar': False})

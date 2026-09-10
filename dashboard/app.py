@@ -169,7 +169,7 @@ inject_css()
 # Sidebar Navigation
 st.sidebar.markdown(
     "<style>.wt_logo{width:44px;height:44px;border-radius:11px;"
-    "background:linear-gradient(140deg,#2E9E56,#1D6B38);display:flex;align-items:center;"
+    "background:linear-gradient(140deg,#1E78B8,#155A8A);display:flex;align-items:center;"
     "justify-content:center;color:#fff;font-size:22px;font-weight:800;}</style>",
     unsafe_allow_html=True,
 )
@@ -178,8 +178,8 @@ st.sidebar.markdown(
     "<div style='display:flex;align-items:center;gap:12px'>"
     "<span class='wt_logo'>W</span>"
     "<div>"
-    "<div style='font-size:19px;font-weight:700;color:#FAFAFA'>WindTrack</div>"
-    "<div style='font-size:12px;color:#8B93A7'>Wind Farm Intelligence Platform</div>"
+    "<div style='font-size:19px;font-weight:700;color:#1A2332'>WindTrack</div>"
+    "<div style='font-size:12px;color:#5B6470'>Wind Farm Intelligence Platform</div>"
     "</div></div>",
     unsafe_allow_html=True,
 )
@@ -215,7 +215,7 @@ sim_label = ("Simulator &middot; Running" if _sim_thread.is_alive()
 
 st.sidebar.markdown(
     f"<div class='wt_sys'>"
-    f"<div style='font-size:12px;font-weight:700;letter-spacing:0.08em;color:#8B93A7'>SYSTEM STATUS</div>"
+    f"<div style='font-size:12px;font-weight:700;letter-spacing:0.08em;color:#5B6470'>SYSTEM STATUS</div>"
     f"<div class='wt_sysrow'><span class='wt_dot {db_tone}'></span>{db_label}</div>"
     f"<div class='wt_sysrow'><span class='wt_dot {sim_tone}'></span>{sim_label}</div>"
     f"<div class='wt_meta'>Last write: {last_write or 'None yet'}<br>Live readings: {live_count:,}</div>"

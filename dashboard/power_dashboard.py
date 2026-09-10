@@ -7,7 +7,7 @@ import sqlite3
 
 from ui import inject_css, style_fig, kpi_card, render_header
 
-COLORS = {'ok': '#34D399', 'warn': '#FBBF24', 'crit': '#F87171'}
+COLORS = {'ok': '#16A34A', 'warn': '#D97706', 'crit': '#DC2626'}
 
 # ── Load data ───────────────────────────────────────────
 @st.cache_data(ttl=3600, show_spinner=False)
@@ -217,7 +217,7 @@ def show():
             title="Farm Total Monthly Output — 2024",
             markers=True,
             labels={'GWh': 'Output (GWh)', 'month': 'Month'},
-            color_discrete_sequence=['#2E9E56']
+            color_discrete_sequence=['#1E78B8']
         )
         fig_month.update_traces(line=dict(width=3), marker=dict(size=10))
         style_fig(fig_month, 380)

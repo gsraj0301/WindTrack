@@ -9,14 +9,14 @@ from datetime import datetime
 
 FONT = "Inter, system-ui, 'Segoe UI', sans-serif"
 
-# Semantic color tokens (dark theme)
+# Semantic color tokens (sky-light theme)
 COLORS = {
-    'ok':   '#34D399',
-    'warn': '#FBBF24',
-    'crit': '#F87171',
-    'ink':  '#FAFAFA',
-    'muted': '#8B93A7',
-    'grid': 'rgba(255,255,255,0.06)',
+    'ok':   '#16A34A',
+    'warn': '#D97706',
+    'crit': '#DC2626',
+    'ink':  '#1A2332',
+    'muted': '#5B6470',
+    'grid': 'rgba(26,35,50,0.08)',
 }
 
 CSS = f"""
@@ -27,8 +27,8 @@ html, body, [data-testid="stAppViewContainer"],
 }}
 
 .wt_card {{
-    background: #1A1F2E;
-    border: 1px solid rgba(255,255,255,0.07);
+    background: #FFFFFF;
+    border: 1px solid rgba(26,35,50,0.08);
     border-radius: 10px;
     padding: 12px 14px;
 }}
@@ -61,9 +61,9 @@ html, body, [data-testid="stAppViewContainer"],
     letter-spacing: 0.01em;
     line-height: 1.7;
 }}
-.wt_chip.ok  {{ background: rgba(16,185,129,0.14); color: {COLORS['ok']}; }}
-.wt_chip.warn {{ background: rgba(245,158,11,0.14); color: {COLORS['warn']}; }}
-.wt_chip.crit {{ background: rgba(239,68,68,0.16);  color: {COLORS['crit']}; }}
+.wt_chip.ok  {{ background: rgba(22,163,74,0.12); color: {COLORS['ok']}; }}
+.wt_chip.warn {{ background: rgba(217,119,6,0.14); color: {COLORS['warn']}; }}
+.wt_chip.crit {{ background: rgba(220,38,38,0.12);  color: {COLORS['crit']}; }}
 
 .wt_dot {{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; }}
 .wt_dot.ok  {{ background: {COLORS['ok']}; }}
@@ -73,17 +73,17 @@ html, body, [data-testid="stAppViewContainer"],
 .wt_live {{
     display: inline-flex; align-items: center; gap: 7px;
     padding: 3px 12px; border-radius: 999px;
-    background: rgba(16,185,129,0.14); color: {COLORS['ok']};
+    background: rgba(30,120,184,0.12); color: #1E78B8;
     font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
 }}
 .wt_live .wt_dot {{ width: 7px; height: 7px; }}
 .wt_live.on .wt_dot {{ animation: wt_pulse 1.6s ease-out infinite; }}
 @keyframes wt_pulse {{
-    0% {{ box-shadow: 0 0 0 0 rgba(52,211,153,0.55); }}
-    70% {{ box-shadow: 0 0 0 7px rgba(52,211,153,0); }}
-    100% {{ box-shadow: 0 0 0 0 rgba(52,211,153,0); }}
+    0% {{ box-shadow: 0 0 0 0 rgba(30,120,184,0.5); }}
+    70% {{ box-shadow: 0 0 0 7px rgba(30,120,184,0); }}
+    100% {{ box-shadow: 0 0 0 0 rgba(30,120,184,0); }}
 }}
-.wt_live.off {{ background: rgba(148,163,184,0.12); color: {COLORS['muted']}; }}
+.wt_live.off {{ background: rgba(148,163,184,0.16); color: {COLORS['muted']}; }}
 
 .wt_title_row {{
     display: flex; align-items: center; justify-content: space-between;
@@ -100,11 +100,11 @@ html, body, [data-testid="stAppViewContainer"],
 
 .wt_sys .wt_sysrow {{ display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 13px; }}
 .wt_sys .wt_meta {{ font-size: 11px; color: #6B7280; margin-top: 4px; }}
-.wt_sys .sep {{ border-top: 1px solid rgba(255,255,255,0.07); margin: 10px 0 6px; }}
+.wt_sys .sep {{ border-top: 1px solid rgba(26,35,50,0.08); margin: 10px 0 6px; }}
 
 .wt_logo {{
     width: 44px; height: 44px; border-radius: 11px;
-    background: linear-gradient(140deg, #2E9E56, #1D6B38);
+    background: linear-gradient(140deg, #1E78B8, #155A8A);
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-size: 22px; font-weight: 800;
     letter-spacing: -0.02em;
@@ -195,7 +195,7 @@ def render_legend(items):
 
 
 def style_fig(fig, height=None):
-    """Apply the shared dark-clean layout to a Plotly figure."""
+    """Apply the shared sky-light layout to a Plotly figure."""
     fig.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
@@ -203,7 +203,7 @@ def style_fig(fig, height=None):
         title=dict(font=dict(color=COLORS['ink'], size=15), x=0.01, xanchor='left'),
         margin=dict(t=44, b=12, l=12, r=12),
         legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color=COLORS['muted'])),
-        hoverlabel=dict(bgcolor='#1A1F2E', font=dict(color=COLORS['ink'])),
+        hoverlabel=dict(bgcolor='#FFFFFF', font=dict(color=COLORS['ink'])),
     )
     fig.update_xaxes(gridcolor=COLORS['grid'])
     fig.update_yaxes(gridcolor=COLORS['grid'])
